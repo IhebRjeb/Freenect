@@ -772,13 +772,12 @@ void FreenectTOP::fn2_execute(TD::TOP_Output* output, const TD::OP_Inputs* input
         fn2_device->setResolutions(fn2_colorW, fn2_colorH, fn2_depthW, fn2_depthH, fn2_pcW, fn2_pcH, fn2_irW, fn2_irH);
     }
 
-    // Create output buffers
-    TD::OP_SmartRef<TD::TOP_Buffer> colorFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_colorW * fn2_colorH * 4, TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
-    TD::OP_SmartRef<TD::TOP_Buffer> depthFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_depthW * fn2_depthH * 2, TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
-    TD::OP_SmartRef<TD::TOP_Buffer> pointCloudFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_pcW * fn2_pcH * 4 * sizeof(float), TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
-    TD::OP_SmartRef<TD::TOP_Buffer> irFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_irW * fn2_irH * 2, TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
+    // Output buffers are allocated lazily, only for the streams that are
+    // enabled this frame. This avoids per-frame allocation of large buffers
+    // (e.g. the multi-megabyte point cloud) for streams that are switched off.
 
     // --- Color frame ---
+    TD::OP_SmartRef<TD::TOP_Buffer> colorFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_colorW * fn2_colorH * 4, TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
     std::vector<uint8_t> colorFrame;
     if (colorFrameBuffer && fn2_device->getColorFrame(colorFrame)) {
         errorString.clear();
@@ -795,6 +794,7 @@ void FreenectTOP::fn2_execute(TD::TOP_Output* output, const TD::OP_Inputs* input
     
     // --- Depth frame ---
     if (streamEnabledDepth) {
+        TD::OP_SmartRef<TD::TOP_Buffer> depthFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_depthW * fn2_depthH * 2, TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
         std::vector<uint16_t> depthFrame;
         if (depthFrameBuffer && fn2_device->getDepthFrame(depthFrame, depthFormat, depthThreshMin, depthThreshMax)) {
             errorString.clear();
@@ -814,6 +814,7 @@ void FreenectTOP::fn2_execute(TD::TOP_Output* output, const TD::OP_Inputs* input
     
     // --- Point Cloud frame ---
     if (streamEnabledPC) {
+        TD::OP_SmartRef<TD::TOP_Buffer> pointCloudFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_pcW * fn2_pcH * 4 * sizeof(float), TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
         std::vector<float> pointCloudFrame;
         if (pointCloudFrameBuffer && fn2_device->getPointCloudFrame(pointCloudFrame)) {
             errorString.clear();
@@ -833,6 +834,7 @@ void FreenectTOP::fn2_execute(TD::TOP_Output* output, const TD::OP_Inputs* input
 
     // --- IR frame ---
     if (streamEnabledIR) {
+        TD::OP_SmartRef<TD::TOP_Buffer> irFrameBuffer = fntdContext ? fntdContext->createOutputBuffer(fn2_irW * fn2_irH * 2, TD::TOP_BufferFlags::None, nullptr) : TD::OP_SmartRef<TD::TOP_Buffer>();
         std::vector<uint16_t> irFrame;
         if (irFrameBuffer && fn2_device->getIRFrame(irFrame)) {
             errorString.clear();
