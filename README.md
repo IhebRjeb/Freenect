@@ -12,6 +12,9 @@ It leverages [libfreenect](https://github.com/OpenKinect/libfreenect) and [libfr
 * TouchDesigner 2025+ (any license)
 * Kinect V1 / Kinect V2
 
+> [!NOTE]
+> This is the **Intel (x86_64) branch**. The bundled static libraries and the Xcode project target `x86_64`, matching Intel-based Macs where TouchDesigner runs as an x86_64 process. If you don't have full Xcode, run `scripts/build_plugin_x86_64.sh --install` to build and install the plugin using only the Command Line Tools. Use `scripts/build_libs_x86_64.sh` to regenerate the bundled Kinect libraries for x86_64.
+
 ### Supported features
 | Feature                                       | Kinect V1 | Kinect V2 |
 | --------------------------------------------- | --------- | --------- |

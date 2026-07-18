@@ -55,12 +55,12 @@ cat > "$DISTRIBUTION_XML" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
     <title>${PLUGIN_NAME} v${VERSION}</title>
-    <options allow-external-scripts="no" hostArchitectures="arm64"/>
+    <options allow-external-scripts="no" hostArchitectures="x86_64"/>
     <allowed-os-versions>
         <os-version min="12.4"/>
     </allowed-os-versions>
     <allowed-architectures>
-        <architecture>arm64</architecture>
+        <architecture>x86_64</architecture>
     </allowed-architectures>
     <readme file="readme.txt"/>
     <choices-outline>
