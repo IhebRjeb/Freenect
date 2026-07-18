@@ -491,8 +491,13 @@ void FreenectTOP::fn2_startEnumThread() {
     fn2_enumThreadRunning = true;
     LOG("[FreenectTOP] fn2_startEnumThread: fn2_enumThreadRunning after = " + std::to_string(fn2_enumThreadRunning.load()));
     fn2_enumThread = std::thread([this]() {
+        // Create the enumeration context once and reuse it. Re-creating a
+        // libfreenect2::Freenect2 context on every iteration needlessly tears
+        // down and rebuilds the underlying libusb context ~10x/second, wasting
+        // CPU and churning the USB bus. enumerateDevices() can be called
+        // repeatedly on the same context to refresh the device list.
+        libfreenect2::Freenect2 ctx;
         while (fn2_enumThreadRunning.load()) {
-            libfreenect2::Freenect2 ctx;
             fn2_deviceAvailable = (ctx.enumerateDevices() > 0);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
