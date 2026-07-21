@@ -405,7 +405,10 @@ bool MyFreenect2Device::getDepthFrame(std::vector<uint16_t>& out, depthFormatEnu
         return false;
     }
 
-    std::vector<float> flipped(srcWidth * srcHeight);
+    const size_t depthFlipCount = static_cast<size_t>(srcWidth) * srcHeight;
+    if (depthFlipScratch_.size() != depthFlipCount)
+        depthFlipScratch_.resize(depthFlipCount);
+    std::vector<float>& flipped = depthFlipScratch_;
     vImage_Buffer srcBuf = {
         .data = const_cast<float*>(srcData),
         .height = (vImagePixelCount)srcHeight,
@@ -420,7 +423,10 @@ bool MyFreenect2Device::getDepthFrame(std::vector<uint16_t>& out, depthFormatEnu
     };
     vImageHorizontalReflect_PlanarF(&srcBuf, &flipBuf, kvImageDoNotTile);
 
-    std::vector<float> scaled(static_cast<size_t>(dstWidth) * dstHeight);
+    const size_t depthScaledCount = static_cast<size_t>(dstWidth) * dstHeight;
+    if (depthScaledScratch_.size() != depthScaledCount)
+        depthScaledScratch_.resize(depthScaledCount);
+    std::vector<float>& scaled = depthScaledScratch_;
     vImage_Buffer dstBuf = {
         .data = scaled.data(),
         .height = (vImagePixelCount)dstHeight,
@@ -533,7 +539,10 @@ bool MyFreenect2Device::getPointCloudFrame(std::vector<float>& out) {
     const int pcDstWidth = dstWidth;
     const int pcDstHeight = dstHeight;
 
-    std::vector<float> flipped(static_cast<size_t>(srcWidth) * srcHeight * 4);
+    const size_t pcFlipCount = static_cast<size_t>(srcWidth) * srcHeight * 4;
+    if (pcFlipScratch_.size() != pcFlipCount)
+        pcFlipScratch_.resize(pcFlipCount);
+    std::vector<float>& flipped = pcFlipScratch_;
     vImage_Buffer srcBuf = {
         .data = const_cast<float*>(srcData),
         .height = (vImagePixelCount)srcHeight,
@@ -599,7 +608,9 @@ bool MyFreenect2Device::getIRFrame(std::vector<uint16_t>& out) {
         .rowBytes = srcWidth * sizeof(float)
     };
 
-    std::vector<float> reflected(srcPixelCount);
+    if (irReflectScratch_.size() != srcPixelCount)
+        irReflectScratch_.resize(srcPixelCount);
+    std::vector<float>& reflected = irReflectScratch_;
     vImage_Buffer tmp = {
         .data = reflected.data(),
         .height = (vImagePixelCount)srcHeight,
@@ -609,7 +620,10 @@ bool MyFreenect2Device::getIRFrame(std::vector<uint16_t>& out) {
 
     vImageHorizontalReflect_PlanarF(&src, &tmp, kvImageNoFlags);
 
-    std::vector<float> scaled(static_cast<size_t>(dstWidth) * dstHeight);
+    const size_t irScaledCount = static_cast<size_t>(dstWidth) * dstHeight;
+    if (irScaledScratch_.size() != irScaledCount)
+        irScaledScratch_.resize(irScaledCount);
+    std::vector<float>& scaled = irScaledScratch_;
     vImage_Buffer dst = {
         .data = scaled.data(),
         .height = (vImagePixelCount)dstHeight,

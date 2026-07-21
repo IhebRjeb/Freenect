@@ -81,6 +81,11 @@ private:
     std::vector<float>      flipDstBuffer;
     std::vector<float>      registeredCroppedBuffer;
     std::vector<uint8_t>    colorFlipScratch_; // reused per-frame RGB flip buffer (cook thread only)
+    std::vector<float>      depthFlipScratch_;   // reused depth flip scratch (cook thread only)
+    std::vector<float>      depthScaledScratch_; // reused depth scale scratch (cook thread only)
+    std::vector<float>      pcFlipScratch_;      // reused point-cloud flip scratch (cook thread only)
+    std::vector<float>      irReflectScratch_;   // reused IR reflect scratch (cook thread only)
+    std::vector<float>      irScaledScratch_;    // reused IR scale scratch (cook thread only)
     bool                    lastRegisteredDepthValid = false;
     std::mutex              mutex;
     bool                    hasNewRGB;
