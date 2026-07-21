@@ -86,6 +86,12 @@ private:
     std::vector<float>      pcFlipScratch_;      // reused point-cloud flip scratch (cook thread only)
     std::vector<float>      irReflectScratch_;   // reused IR reflect scratch (cook thread only)
     std::vector<float>      irScaledScratch_;    // reused IR scale scratch (cook thread only)
+    std::vector<uint8_t>    colorLocalRGB_;   // reused under-lock RGB copy for getColorFrame (cook thread only)
+    std::vector<float>      depthLocalDepth_; // reused under-lock depth copy for getDepthFrame (cook thread only)
+    std::vector<uint8_t>    depthLocalRGB_;   // reused under-lock RGB copy for getDepthFrame (cook thread only)
+    std::vector<float>      pcLocalDepth_;    // reused under-lock depth copy for getPointCloudFrame (cook thread only)
+    std::vector<uint8_t>    pcLocalRGB_;      // reused under-lock RGB copy for getPointCloudFrame (cook thread only)
+    std::vector<float>      irLocalIR_;       // reused under-lock IR copy for getIRFrame (cook thread only)
     bool                    lastRegisteredDepthValid = false;
     std::mutex              mutex;
     bool                    hasNewRGB;

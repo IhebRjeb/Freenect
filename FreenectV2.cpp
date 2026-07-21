@@ -231,7 +231,7 @@ bool MyFreenect2Device::getIR(std::vector<float>& out) {
 }
 
 bool MyFreenect2Device::getColorFrame(std::vector<uint8_t>& out) {
-    std::vector<uint8_t> localRGB;
+    std::vector<uint8_t>& localRGB = colorLocalRGB_;
     int dstWidth = 0;
     int dstHeight = 0;
     {
@@ -295,8 +295,8 @@ bool MyFreenect2Device::getColorFrame(std::vector<uint8_t>& out) {
 
 bool MyFreenect2Device::getDepthFrame(std::vector<uint16_t>& out, depthFormatEnum type, float depthThreshMin, float depthThreshMax) {
     LOG("[FreenectV2.cpp] getDepthFrame(): called with type=" + std::to_string(static_cast<int>(type)));
-    std::vector<float> localDepth;
-    std::vector<uint8_t> localRGB;
+    std::vector<float>& localDepth = depthLocalDepth_;
+    std::vector<uint8_t>& localRGB = depthLocalRGB_;
     libfreenect2::Freenect2Device* localDevice = nullptr;
     int dstWidth = 0;
     int dstHeight = 0;
@@ -462,8 +462,8 @@ bool MyFreenect2Device::getDepthFrame(std::vector<uint16_t>& out, depthFormatEnu
 
 bool MyFreenect2Device::getPointCloudFrame(std::vector<float>& out) {
     LOG("[FreenectV2.cpp] getPointCloudFrame(): called");
-    std::vector<uint8_t> localRGB;
-    std::vector<float> localDepth;
+    std::vector<uint8_t>& localRGB = pcLocalRGB_;
+    std::vector<float>& localDepth = pcLocalDepth_;
     libfreenect2::Freenect2Device* localDevice = nullptr;
     int dstWidth = 0;
     int dstHeight = 0;
@@ -579,7 +579,7 @@ bool MyFreenect2Device::getPointCloudFrame(std::vector<float>& out) {
 
 bool MyFreenect2Device::getIRFrame(std::vector<uint16_t>& out) {
     LOG("[FreenectV2.cpp] getIRFrame(): called");
-    std::vector<float> localIR;
+    std::vector<float>& localIR = irLocalIR_;
     int dstWidth = 0;
     int dstHeight = 0;
     {
