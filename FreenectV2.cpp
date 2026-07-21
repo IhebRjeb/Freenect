@@ -258,7 +258,12 @@ bool MyFreenect2Device::getColorFrame(std::vector<uint8_t>& out) {
         .rowBytes = static_cast<size_t>(srcWidth * 4)
     };
 
-    std::vector<uint8_t> tmpFlip(srcWidth * srcHeight * 4);
+    // Reuse a persistent scratch buffer for the horizontal flip instead of
+    // allocating ~8 MB on every cook. Only ever touched on the cook thread.
+    const size_t flipSize = static_cast<size_t>(srcWidth) * srcHeight * 4;
+    if (colorFlipScratch_.size() != flipSize)
+        colorFlipScratch_.resize(flipSize);
+    std::vector<uint8_t>& tmpFlip = colorFlipScratch_;
     vImage_Buffer tmpFlipBuf = {
         .data = tmpFlip.data(),
         .height = (vImagePixelCount)srcHeight,
@@ -274,7 +279,6 @@ bool MyFreenect2Device::getColorFrame(std::vector<uint8_t>& out) {
         .width  = (vImagePixelCount)dstWidth,
         .rowBytes = static_cast<size_t>(dstWidth * 4)
     };
-
     if (dstWidth != srcWidth || dstHeight != srcHeight) {
         vImageScale_ARGB8888(&tmpFlipBuf, &dst, nullptr,
                              kvImageHighQualityResampling | kvImageDoNotTile);

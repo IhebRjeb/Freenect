@@ -80,6 +80,7 @@ private:
     std::vector<float>      bigdepthBufferCropped;
     std::vector<float>      flipDstBuffer;
     std::vector<float>      registeredCroppedBuffer;
+    std::vector<uint8_t>    colorFlipScratch_; // reused per-frame RGB flip buffer (cook thread only)
     bool                    lastRegisteredDepthValid = false;
     std::mutex              mutex;
     bool                    hasNewRGB;
