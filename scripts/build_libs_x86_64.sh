@@ -18,7 +18,13 @@ ARCH="x86_64"
 MIN_OS="12.4"
 LIBUSB_TAG="v1.0.29"
 FREENECT_TAG="v0.7.5"
-FREENECT2_TAG="v0.2.0"
+# NOTE: libfreenect2 is pinned to a master commit, NOT the v0.2.0 release tag.
+# The bundled public headers in include/headers/libfreenect2/ are from master
+# (they declare post-0.2.0 API such as setColorAutoExposure/ColorSettingCommandType/
+# Freenect2Replay). Building from the v0.2.0 tag produces a different
+# Freenect2Device vtable layout, so virtual calls (e.g. startStreams) dispatch
+# to the wrong slot and crash (SIGBUS). This commit matches the bundled headers.
+FREENECT2_REF="fd64c5d"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_LIBS="$REPO_ROOT/include/libs"
@@ -58,8 +64,9 @@ cmake --build build --target freenectstatic -j"$(sysctl -n hw.ncpu)"
 # ---------------------------------------------------------------- libfreenect2
 cd "$WORK"
 rm -rf libfreenect2
-git clone --depth 1 --branch "$FREENECT2_TAG" https://github.com/OpenKinect/libfreenect2.git
+git clone https://github.com/OpenKinect/libfreenect2.git
 cd libfreenect2
+git checkout "$FREENECT2_REF"
 PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" cmake -S . -B build \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DCMAKE_OSX_ARCHITECTURES="$ARCH" \
@@ -79,6 +86,15 @@ cp "$WORK/libfreenect2/build/lib/libfreenect2.a" "$REPO_LIBS/libfreenect2_0.2.0.
 # Keep the bundled config.h in sync with the way libfreenect2 was built.
 cp "$WORK/libfreenect2/build/libfreenect2/config.h" \
    "$REPO_ROOT/include/headers/libfreenect2/config.h"
+
+# Keep the bundled public headers in sync with the exact source the library was
+# built from. The Freenect2Device vtable layout is defined by these headers, so
+# they MUST match the compiled archive or virtual dispatch will crash.
+for h in libfreenect2.hpp frame_listener.hpp frame_listener_impl.h registration.h \
+         packet_pipeline.h logger.h color_settings.h led_settings.h export.h; do
+    cp "$WORK/libfreenect2/include/libfreenect2/$h" \
+       "$REPO_ROOT/include/headers/libfreenect2/$h" 2>/dev/null || true
+done
 
 echo "==> Installed x86_64 static libraries:"
 for f in "$REPO_LIBS"/*.a; do printf "    %s: " "$f"; lipo -archs "$f"; done
